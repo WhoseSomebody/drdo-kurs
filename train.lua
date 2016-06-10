@@ -19,7 +19,6 @@ cmd:text('Options')
 cmd:option('-data_dir','data/tinyshakespeare','data directory. Should contain the file input.txt with input data')
 
 cmd:option('-rnn_size', 128, 'size of LSTM internal state')
-
 cmd:option('-num_layers', 2, 'number of layers in the LSTM')
 cmd:option('-seed',123,'torch manual random number generator seed')
 cmd:option('-opencl',0,'use OpenCL')
@@ -74,13 +73,13 @@ print('vocab size: ' .. vocab_size)
 
 if not path.exists(opt.checkpoint_dir) then lfs.mkdir(opt.checkpoint_dir) end
 
--- визначення конкретної поточної моделі (кількість шарів, розмір мережі, словника та дроп-аут)
+-- визначення стану поточної моделі (кількість шарів, розмір мережі, словника та дроп-аут)
 local do_random_init = true
 if string.len(opt.init_from) > 0 then
     print('loading a model from checkpoint ' .. opt.init_from)
     local checkpoint = torch.load(opt.init_from)
     protos = checkpoint.protos
-    -- make sure the vocabs are the same
+    -- перевірка збіжності словників
     local vocab_compatible = true
     local checkpoint_vocab_size = 0
     for c,i in pairs(checkpoint.vocab) do
@@ -94,7 +93,7 @@ if string.len(opt.init_from) > 0 then
         print('checkpoint_vocab_size: ' .. checkpoint_vocab_size)
     end
     assert(vocab_compatible, 'error, the character vocabulary for this dataset and the one in the saved checkpoint are not the same. This is trouble.')
-    -- overwrite model settings based on checkpoint to ensure compatibility
+    -- перезапис параметрів моделі, що базуються на checkpoint для забезпеченя сходженняя
     print('overwriting rnn_size=' .. checkpoint.opt.rnn_size .. ', num_layers=' .. checkpoint.opt.num_layers .. ', model=' .. checkpoint.opt.model .. ' based on the checkpoint.')
     opt.rnn_size = checkpoint.opt.rnn_size
     opt.num_layers = checkpoint.opt.num_layers
@@ -103,13 +102,7 @@ if string.len(opt.init_from) > 0 then
 else
     print('creating an ' .. opt.model .. ' with ' .. opt.num_layers .. ' layers')
     protos = {}
-    if opt.model == 'lstm' then
-        protos.rnn = LSTM.lstm(vocab_size, opt.rnn_size, opt.num_layers, opt.dropout)
-    elseif opt.model == 'gru' then
-        protos.rnn = GRU.gru(vocab_size, opt.rnn_size, opt.num_layers, opt.dropout)
-    elseif opt.model == 'rnn' then
-        protos.rnn = RNN.rnn(vocab_size, opt.rnn_size, opt.num_layers, opt.dropout)
-    end
+    protos.rnn = LSTM.lstm(vocab_size, opt.rnn_size, opt.num_layers, opt.dropout)
     protos.criterion = nn.ClassNLLCriterion()
 end
 
