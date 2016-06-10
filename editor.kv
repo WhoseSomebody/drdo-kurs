@@ -1,0 +1,72 @@
+#:kivy 1.1.0
+
+Root:
+
+    BoxLayout:
+        orientation: 'vertical'
+        BoxLayout:
+            size_hint: 1,.5
+            Label:
+                text: 'PIANO EXTRACTOR v1.0 (beta)'
+                color: 1,1,.8,1
+                canvas.before:
+                    Color:
+                        rgba: .5, .1, .7, .5
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+        BoxLayout:
+            size_hint: 1,.3
+            Button:
+                text: "Choose target audiofile..."
+                on_release: root.start_work()
+        BoxLayout:
+            size_hint: 1,.2
+            Button:
+                id: button_one
+                text: 'RUN EXTRACTION!'
+                on_release: root.start_process()
+
+<PopupMessage>:
+    canvas.before:
+        Color:
+            rgba: 1, 1, 1, 1
+    BoxLayout:
+        size: root.size
+        pos: root.pos
+        orientation: "vertical"
+        Label:
+            text: "Ok. Success. ^_^" 
+        BoxLayout:
+            size_hint_y: None
+            height: 22
+
+            Button:
+                background_color: 0, 1, 0, 0.2
+                text: "OK"
+                on_release: root.cancel()
+
+
+<LoadTargetDialog>:
+    BoxLayout:
+        size: root.size
+        pos: root.pos
+        orientation: "vertical"
+        FileChooserListView:
+            id: filechooser
+            filters: ['*.mp3', '*.wav']
+            path: root.working_dir
+
+
+        BoxLayout:
+            size_hint_y: None
+            height: 28
+            Button:
+                background_color: 1, 0, 0, 0.2
+                text: "Cancel"
+                on_release: root.cancel()
+
+            Button:
+                background_color: 0, 1, 0, 0.2
+                text: "Upload Audio"
+                on_release: root.load_audio(filechooser.path, filechooser.selection)
