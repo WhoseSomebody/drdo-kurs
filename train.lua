@@ -103,7 +103,7 @@ else
     print('creating an ' .. opt.model .. ' with ' .. opt.num_layers .. ' layers')
     protos = {}
     protos.rnn = LSTM.lstm(vocab_size, opt.rnn_size, opt.num_layers, opt.dropout)
-    protos.criterion = nn.ClassNLLCriterion()
+    protos.criterion = nn.ClassNLLCriterion() -- клас для обчислення градієнту
 end
 
 
@@ -194,7 +194,7 @@ function feval(x)
     end
     grad_params:zero()
 
-    ---- відрізати маленьку порцію інформації
+    ---- відрізати порцію інформації
     local x, y = loader:next_batch(1)
     x,y = prepro(x,y)
     --------- (fwd)
